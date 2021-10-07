@@ -10,19 +10,25 @@ profile = service.users().getProfile(userId='tahmeemmahedi@gmail.com').execute()
 emailAddress = profile['emailAddress']
 messages = profile['messagesTotal']
 
-def parse_msg(msg):
-    message_bytes = msg.encode('ascii')
-    base64_bytes = base64.b64encode(message_bytes)
-    base64_message = base64_bytes.decode('ascii')
-    return base64_message
 
 labels = service.users().labels().get(userId='tahmeemmahedi@gmail.com',id='CATEGORY_PERSONAL').execute()
 
+def findEmail(email):
+    email = email[1:len(email)-1]
+    return email
 
 messagesRead = service.users().messages().list(userId='tahmeemmahedi@gmail.com',labelIds=['CATEGORY_PROMOTIONS']).execute()
 for i in messagesRead['messages']:
-    msgFirst = service.users().messages().get(userId='tahmeemmahedi@gmail.com',id=i['id']).execute()
+    msgFirst = service.users().messages().get(userId='tahmeemmahedi@gmail.com',id=i['id'],format="full").execute()
     print(msgFirst['snippet'])
+    headers = msgFirst['payload']['headers']
+    for header in headers:
+        if header['name'] == 'From':
+            headerList = header['value'].split()
+            headerEmail = headerList.pop(-1)
+            headerEmail = findEmail(headerEmail)
+            headerName = " ".join(headerList)
+            print(headerName + ' Email' + ' ' + headerEmail)
     print('\n\n')
 
 #print(messagesRead)
