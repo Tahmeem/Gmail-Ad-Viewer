@@ -11,22 +11,19 @@ emailAddress = profile['emailAddress']
 messages = profile['messagesTotal']
 
 def parse_msg(msg):
-    if msg.get("payload").get("body").get("data"):
-        return base64.urlsafe_b64decode(msg.get("payload").get("body").get("data").encode("ASCII")).decode("utf-8")
-    return msg.get("snippet")
-
+    message_bytes = msg.encode('ascii')
+    base64_bytes = base64.b64encode(message_bytes)
+    base64_message = base64_bytes.decode('ascii')
+    return base64_message
 
 labels = service.users().labels().get(userId='tahmeemmahedi@gmail.com',id='CATEGORY_PERSONAL').execute()
-messages = service.users().messages().list(userId='tahmeemmahedi@gmail.com').execute()
-for i in messages['messages']:
-    msgid = i['id']
-    msgContent = service.users().messages().get(userId='tahmeemmahedi@gmail.com',id=msgid).execute()
-    #if 'CATEGORY_PROMOTIONS' in msgContent['labelIds']:
-    newmsg= parse_msg(msgContent)
-    print('Message Content:' + newmsg)
 
-messageId = messages['messages'][0]['id']
-messagesRead = service.users().messages().get(userId='tahmeemmahedi@gmail.com',id=messageId).execute()
+
+messagesRead = service.users().messages().list(userId='tahmeemmahedi@gmail.com',labelIds=['CATEGORY_PROMOTIONS']).execute()
+for i in messagesRead['messages']:
+    msgFirst = service.users().messages().get(userId='tahmeemmahedi@gmail.com',id=i['id']).execute()
+    print(msgFirst['snippet'])
+    print('\n\n')
 
 #print(messagesRead)
 
